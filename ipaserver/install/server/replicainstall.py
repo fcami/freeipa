@@ -1022,7 +1022,7 @@ def promote_check(installer):
         if subject_base is not None:
             config.subject_base = DN(subject_base)
 
-        # Find if any running server with a CA
+        # Find any running server with a CA
         ca_host = find_providing_server(
             'CA', conn, [config.ca_host_name]
         )
@@ -1046,6 +1046,7 @@ def promote_check(installer):
                              "custom certificates.")
                 raise ScriptError(rval=3)
 
+        # Find any running server with a KRA
         kra_host = find_providing_server(
             'KRA', conn, [config.kra_host_name]
         )
@@ -1054,8 +1055,9 @@ def promote_check(installer):
             kra_enabled = True
         else:
             if options.setup_kra:
-                logger.error("There is no active KRA server in the domain, "
-                             "can't setup a KRA clone")
+                logger.error("Unable to find any active KRA server "
+                             "in the domain. Is KRA configured? "
+                             "Will not setup a KRA clone.")
                 raise ScriptError(rval=3)
             kra_enabled = False
 
