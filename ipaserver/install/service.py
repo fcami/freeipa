@@ -39,7 +39,7 @@ from ipalib import api, errors, x509
 from ipaplatform import services
 from ipaplatform.paths import paths
 from ipaserver.masters import (
-    CONFIGURED_SERVICE, ENABLED_SERVICE, SERVICE_LIST
+    CONFIGURED_SERVICE, ENABLED_SERVICE, UNADVERTISED_SERVICE, SERVICE_LIST
 )
 
 logger = logging.getLogger(__name__)
@@ -190,6 +190,16 @@ def enable_services(fqdn):
 
     :param fqdn: hostname of server
     """
+    change_services_status(fqdn)
+
+
+def unadvertize_services(fqdn):
+    change_services_status(fqdn, status=UNADVERTISED_SERVICE)
+
+
+def change_services_status(fqdn, status=ENABLED_SERVICE):
+    """ Change all configured services status
+    """
     ldap2 = api.Backend.ldap2
     search_base = DN(('cn', fqdn), api.env.container_masters, api.env.basedn)
     search_filter = ldap2.make_filter(
@@ -211,8 +221,8 @@ def enable_services(fqdn):
         for value in list(cfgstrings):
             if value.lower() == CONFIGURED_SERVICE.lower():
                 cfgstrings.remove(value)
-        if not case_insensitive_attr_has_value(cfgstrings, ENABLED_SERVICE):
-            cfgstrings.append(ENABLED_SERVICE)
+        if not case_insensitive_attr_has_value(cfgstrings, status):
+            cfgstrings.append(status)
 
         try:
             ldap2.update_entry(entry)

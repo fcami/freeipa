@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # constants for ipaConfigString
 CONFIGURED_SERVICE = u'configuredService'
 ENABLED_SERVICE = u'enabledService'
+UNADVERTISED_SERVICE = u'unadvertisedService'
 
 # The service name as stored in cn=masters,cn=ipa,cn=etc. The values are:
 # 0: systemd service name

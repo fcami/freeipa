@@ -824,6 +824,7 @@ def promote_check(installer):
     config.setup_kra = options.setup_kra
     config.dir = installer._top_dir
     config.basedn = api.env.basedn
+    config.unadvertised = options.unadvertised_replica
 
     http_pkcs12_file = None
     http_pkcs12_info = None
@@ -1295,9 +1296,14 @@ def install(installer):
     if options.setup_adtrust:
         adtrust.install(False, options, fstore, api)
 
-    # Enable configured services and update DNS SRV records
-    service.enable_services(config.host_name)
-    api.Command.dns_update_system_records()
+    if options.unadvertised_replica:
+        service.unadvertize_services(config.host_name)
+    else:
+        # Enable configured services and update DNS SRV records
+        service.enable_services(config.host_name)
+        api.Command.dns_update_system_records()
+
+    # To count how many servers have the CA role installed
     ca_servers = find_providing_servers('CA', api.Backend.ldap2, api=api)
     api.Backend.ldap2.disconnect()
 

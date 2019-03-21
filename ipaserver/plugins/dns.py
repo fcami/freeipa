@@ -4556,6 +4556,7 @@ class dns_update_system_records(Method):
             result['result']['location_records'] = output_to_list(
                 system_records.get_locations_records().items())
         else:
+            # fcami - check if localhost is marked unadvertised?
             try:
                 (
                     (success_base, failed_base),

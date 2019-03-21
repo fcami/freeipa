@@ -162,7 +162,7 @@ def version_check():
 
 def get_config(dirsrv):
     base = DN(('cn', api.env.host), ('cn', 'masters'), ('cn', 'ipa'), ('cn', 'etc'), api.env.basedn)
-    srcfilter = '(ipaConfigString=enabledService)'
+    srcfilter = '(|(ipaConfigString=enabledService)(ipaConfigString=unadvertisedService))'
     attrs = ['cn', 'ipaConfigString']
     if not dirsrv.is_running():
         raise IpactlError("Failed to get list of services to probe status:\n" +

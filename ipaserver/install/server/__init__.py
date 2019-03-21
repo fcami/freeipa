@@ -237,6 +237,13 @@ class ServerInstallInterface(ServerCertificateInstallInterface,
     )
     master_password = master_install_only(master_password)
 
+    unadvertised_replica = knob(
+        None,
+        cli_names='--unadvertised_replica',
+        description="Install an unadvertised replica",
+    )
+    unadvertised_replica = replica_install_only(unadvertised_replica)
+
     domain_level = knob(
         int, constants.MAX_DOMAIN_LEVEL,
         description="IPA domain level",
