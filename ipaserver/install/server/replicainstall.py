@@ -824,7 +824,7 @@ def promote_check(installer):
     config.setup_kra = options.setup_kra
     config.dir = installer._top_dir
     config.basedn = api.env.basedn
-    config.unadvertised = options.unadvertised_replica
+    config.unadvertised_replica = options.unadvertised_replica
 
     http_pkcs12_file = None
     http_pkcs12_info = None
@@ -1296,6 +1296,13 @@ def install(installer):
     if options.setup_adtrust:
         adtrust.install(False, options, fstore, api)
 
+    service.print_msg(
+        "options: %s" % options.unadvertised_replica
+    )
+
+    service.print_msg(
+        "config: %s" % config.unadvertised_replica
+    )
     if options.unadvertised_replica:
         service.unadvertize_services(config.host_name)
     else:

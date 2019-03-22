@@ -232,7 +232,9 @@ def change_services_status(fqdn, status=ENABLED_SERVICE):
             logger.exception("failed to set service %s config values", name)
             raise
         else:
-            logger.debug("Enabled service %s for %s", name, fqdn)
+            logger.debug(
+                "Changed service %s status for %s to %s", name, fqdn, status
+            )
 
 
 class Service:

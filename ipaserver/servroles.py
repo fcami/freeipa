@@ -80,6 +80,8 @@ import six
 from ipalib import _, errors
 from ipapython.dn import DN
 from ipaserver.masters import ENABLED_SERVICE
+from ipaserver.masters import UNADVERTISED_SERVICE
+
 
 if six.PY3:
     unicode = str
@@ -88,6 +90,7 @@ if six.PY3:
 ENABLED = u'enabled'
 CONFIGURED = u'configured'
 ABSENT = u'absent'
+UNADVERTISED = u'unadvertised'
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -340,8 +343,10 @@ class ServerAttribute(LDAPBasedProperty):
         get list of all servers on which the associated role is enabled
         """
         return [
-            r[u'server_server'] for r in self.associated_role.status(
-                api_instance) if r[u'status'] == ENABLED]
+            r[u'server_server'] for r in
+            self.associated_role.status(api_instance) if
+            r[u'status'] == ENABLED or r[u'status'] == UNADVERTISED]
+
 
     def _remove(self, api_instance, masters):
         """
@@ -486,6 +491,19 @@ class ServiceBasedRole(BaseServerRole):
         ipaconfigstring_values = set(entry.get('ipaConfigString', []))
         return ENABLED_SERVICE in ipaconfigstring_values
 
+    def _is_service_unadvertised(self, entry):
+        """
+        determine whether the service is enabled based on the presence of
+        enabledService attribute in ipaConfigString attribute.
+        Since the attribute is case-insensitive, we must first lowercase its
+        values and do the comparison afterwards.
+
+        :param entry: LDAPEntry of the service
+        :returns: True if the service entry is enabled, False otherwise
+        """
+        ipaconfigstring_values = set(entry.get('ipaConfigString', []))
+        return UNADVERTISED_SERVICE in ipaconfigstring_values
+
     def _get_services_by_masters(self, entries):
         """
         given list of entries, return a dictionary keyed by master FQDNs which
@@ -511,6 +529,7 @@ class ServiceBasedRole(BaseServerRole):
 
             status = (
                 ENABLED if all(s.enabled for s in services) else
+                UNADVERTISED if all(s.unadvertised for s in services) else
                 CONFIGURED)
 
             result.append(self.create_role_status_dict(master, status))
