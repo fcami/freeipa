@@ -23,9 +23,10 @@ import re
 from ipatests.test_integration.base import IntegrationTest
 from ipatests.pytest_ipa.integration import tasks
 from ipaplatform.paths import paths
+from ipapython.dnsutil import DNSName
 
 import os
-import pytest
+# import pytest
 
 # give some time for units to stabilize
 # otherwise we get transient errors
@@ -54,6 +55,7 @@ class TestAutomountLocations(TestInit):
         cls.master.run_command(["cat", "/etc/resolv.conf"])
         cls.master.run_command(["ip", "a", "s"])
         cls.master.run_command(["ip", "a", "s"])
+        cls.domain = DNSName(cls.master.domain.name).make_absolute()
         tasks.install_master(cls.master, setup_dns=True)
 
     def cleanup(self):
@@ -61,7 +63,7 @@ class TestAutomountLocations(TestInit):
         # TODO put /etc/resolv.conf back
         tasks.uninstall_master(self.master)
 
-    @pytest.mark.xfail(reason='freeipa ticket 7814', strict=True)
+    # @pytest.mark.xfail(reason='freeipa ticket 7814', strict=True)
     def test_automountlocationtofiles(self):
         """
         Test if the output of automountlocationtofiles is sane
