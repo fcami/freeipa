@@ -531,6 +531,8 @@ Requires: gssproxy >= 0.7.0-2
 Requires: sssd-dbus >= %{sssd_version}
 Requires: libpwquality
 Requires: cracklib-dicts
+# The server installers enable ipa-healthcheck.timer
+Recommends: %{name}-healthcheck
 # NDR libraries are internal in Samba and change with version without changing SONAME
 %ipa_requires_gt samba-client-libs
 

@@ -21,6 +21,7 @@ suse_system_units["dirsrv"] = "dirsrv@.service"
 suse_system_units["pki-tomcatd"] = "pki-tomcatd@pki-tomcat.service"
 suse_system_units["pki_tomcatd"] = suse_system_units["pki-tomcatd"]
 suse_system_units["ipa-otpd"] = "ipa-otpd.socket"
+suse_system_units["ipa-healthcheck"] = "ipa-healthcheck.timer"
 suse_system_units["ipa-dnskeysyncd"] = "ipa-dnskeysyncd.service"
 suse_system_units["named-regular"] = "named.service"
 suse_system_units["named-pkcs11"] = "named.service"

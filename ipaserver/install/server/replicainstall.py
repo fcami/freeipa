@@ -44,7 +44,7 @@ from ipaserver.install import (
     custodiainstance, service,)
 from ipaserver.install import certs
 from ipaserver.install.installutils import (
-    ReplicaConfig, load_pkcs12, validate_mask)
+    ReplicaConfig, load_pkcs12, validate_mask, enable_healthcheck_timer)
 from ipaserver.install.replication import (
     ReplicationManager, replica_conn_check)
 from ipaserver.masters import find_providing_servers, find_providing_server
@@ -1483,6 +1483,9 @@ def install(installer):
     sstore.delete_state('installation', 'complete')
     sstore.backup_state('installation', 'complete', True)
     services.knownservices.ipa.enable()
+
+    service.print_msg("Enabling the IPA Healthcheck timer")
+    enable_healthcheck_timer()
 
     # Print a warning if CA role is only installed on one server
     if len(ca_servers) == 1:

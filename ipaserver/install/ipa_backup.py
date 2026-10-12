@@ -178,6 +178,8 @@ class Backup(admintool.AdminTool):
         paths.KDC_KEY,
         paths.CACERT_PEM,
         paths.SYSTEMD_IPA_SERVICE,
+        paths.SYSTEMD_IPA_HEALTHCHECK_TIMER,
+        paths.SYSTEMD_IPA_HEALTHCHECK_TIMER_MASK,
         paths.SYSTEMD_SYSTEM_HTTPD_IPA_CONF,
         paths.SYSTEMD_SSSD_SERVICE,
         paths.SYSTEMD_CERTMONGER_SERVICE,

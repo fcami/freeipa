@@ -46,7 +46,7 @@ from ipaserver.install import (
 from ipaserver.install.installutils import (
     BadHostError, get_server_ip_address,
     load_pkcs12, read_password, verify_fqdn, update_hosts_file,
-    validate_mask)
+    validate_mask, enable_healthcheck_timer, disable_healthcheck_timer)
 from ipaserver.install.certs import get_key_type_and_strength
 
 if six.PY3:
@@ -1089,6 +1089,9 @@ def install(installer):
     dur = time.time() - start
     logger.debug("Service enablement duration: %0.3f", dur)
 
+    service.print_msg("Enabling the IPA Healthcheck timer")
+    enable_healthcheck_timer()
+
     print("======================================="
           "=======================================")
     print("Setup complete")
@@ -1302,6 +1305,7 @@ def uninstall(installer):
     sstore.restore_state("install", "group_exists")
 
     services.knownservices.ipa.disable()
+    disable_healthcheck_timer()
 
     # remove upgrade state file
     sysupgrade.remove_upgrade_file()

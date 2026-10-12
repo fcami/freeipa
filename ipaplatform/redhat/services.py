@@ -64,6 +64,7 @@ redhat_system_units['dirsrv'] = 'dirsrv@.service'
 redhat_system_units['pki-tomcatd'] = 'pki-tomcatd@pki-tomcat.service'
 redhat_system_units['pki_tomcatd'] = redhat_system_units['pki-tomcatd']
 redhat_system_units['ipa-otpd'] = 'ipa-otpd.socket'
+redhat_system_units['ipa-healthcheck'] = 'ipa-healthcheck.timer'
 redhat_system_units['ipa-dnskeysyncd'] = 'ipa-dnskeysyncd.service'
 redhat_system_units['named-regular'] = 'named.service'
 redhat_system_units['named-pkcs11'] = 'named-pkcs11.service'

@@ -30,6 +30,7 @@ __all__ = ("constants", "User", "Group")
 class RHELConstantsNamespace(RedHatConstantsNamespace):
     IPA_ADTRUST_PACKAGE_NAME = "ipa-server-trust-ad"
     IPA_DNS_PACKAGE_NAME = "ipa-server-dns"
+    IPA_HEALTHCHECK_PACKAGE_NAME = "ipa-healthcheck"
     if HAS_NFS_CONF:
         SECURE_NFS_VAR = None
     if HAS_PKCS11_OPENSSL_ENGINE:

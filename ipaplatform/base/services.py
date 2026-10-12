@@ -53,7 +53,7 @@ wellknownservices = [
     'named', 'ods_enforcerd', 'ods_signerd', 'gssproxy',
     'nfs-utils', 'sssd', 'NetworkManager', 'ipa-custodia',
     'ipa-dnskeysyncd', 'ipa-otpd', 'ipa-ods-exporter',
-    'systemd-resolved', 'unbound', 'dnsconfd',
+    'systemd-resolved', 'unbound', 'dnsconfd', 'ipa-healthcheck',
 ]
 
 # The common ports for these services. This is used to wait for the
@@ -280,7 +280,8 @@ class SystemdService(PlatformService):
             ipautil.wait_for_open_ports('localhost', ports,
                                         self.api.env.startup_timeout)
 
-    def stop(self, instance_name="", capture_output=True):
+    def stop(self, instance_name="", capture_output=True,
+             update_service_list=None):
         instance = self.service_instance(instance_name)
         args = [paths.SYSTEMCTL, "stop", instance]
 
@@ -297,20 +298,28 @@ class SystemdService(PlatformService):
 
         ipautil.run(args, skip_output=not capture_output)
 
-        update_service_list = getattr(self.api.env, 'context',
-                                      None) in ['ipactl', 'installer']
+        if update_service_list is None:
+            update_service_list = getattr(self.api.env, 'context',
+                                          None) in ['ipactl', 'installer']
         super(SystemdService, self).stop(
             instance_name,
             update_service_list=update_service_list)
         logger.debug('Stop of %s complete', instance)
 
-    def start(self, instance_name="", capture_output=True, wait=True):
+    def start(self, instance_name="", capture_output=True, wait=True, *,
+              update_service_list=None):
+        """
+        update_service_list defaults to recording the service in the
+        service list file in the ipactl and installer contexts, pass
+        False to not record it.
+        """
         ipautil.run([paths.SYSTEMCTL, "start",
                      self.service_instance(instance_name)],
                     skip_output=not capture_output)
 
-        update_service_list = getattr(self.api.env, 'context',
-                                      None) in ['ipactl', 'installer']
+        if update_service_list is None:
+            update_service_list = getattr(self.api.env, 'context',
+                                          None) in ['ipactl', 'installer']
 
         if wait and self.is_running(instance_name):
             self.wait_for_open_ports(self.service_instance(instance_name))
@@ -407,10 +416,12 @@ class SystemdService(PlatformService):
             result = ipautil.run(
                 [paths.SYSTEMCTL, "is-enabled",
                  self.service_instance(instance_name)],
-                capture_output=True)
+                capture_output=True, raiseonerr=False)
 
-            if result.returncode == 1 and result.output == 'masked':
-                masked = True
+            # masked-runtime is a mask in /run, systemd refuses to enable
+            # the unit as well
+            if result.returncode == 1:
+                masked = result.output.strip() in ('masked', 'masked-runtime')
 
         except ipautil.CalledProcessError:
                 pass

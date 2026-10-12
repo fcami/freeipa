@@ -1282,6 +1282,17 @@ def setup_spake(krb):
         aug.close()
 
 
+def enable_healthcheck_timer():
+    """Enable the freeipa-healthcheck timer once on existing servers"""
+    logger.info('[Enable the IPA Healthcheck timer]')
+
+    if sysupgrade.get_upgrade_state('healthcheck', 'timer_enabled'):
+        logger.debug('IPA Healthcheck timer was enabled already')
+        return
+
+    installutils.enable_healthcheck_timer()
+
+
 # Currently, this doesn't support templating.
 def enable_server_snippet():
     logger.info("[Enable server krb5.conf snippet]")
@@ -1996,6 +2007,8 @@ def upgrade_configuration():
     # Must be executed after certificate_renewal_update
     # (see function docstring for details)
     http_certificate_ensure_ipa_ca_dnsname(http)
+
+    enable_healthcheck_timer()
 
     # Convert configuredService to either enabledService or hiddenService
     # depending on the state of the server role.  This is to fix situations

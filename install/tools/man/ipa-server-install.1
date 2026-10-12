@@ -9,6 +9,8 @@ ipa\-server\-install [\fIOPTION\fR]...
 .SH "DESCRIPTION"
 Configures the services needed by an IPA server. This includes setting up a Kerberos Key Distribution Center (KDC) and a Kadmin daemon with an LDAP back\-end, configuring Apache, configuring NTP and optionally configuring and starting an LDAP-backed DNS server. By default a dogtag\-based CA will be configured to issue server certificates.
 
+If the freeipa\-healthcheck package is installed, ipa\-healthcheck.timer is enabled and started so that ipa\-healthcheck runs daily and writes its report to /var/log/ipa/healthcheck. To keep the timer disabled permanently, run "systemctl disable \-\-now ipa\-healthcheck.timer" then "systemctl mask ipa\-healthcheck.timer". Disabling first matters: masking alone leaves the timer's enablement link in place, and a later unmask would enable it again. A masked timer is left untouched by the installer and by ipa\-server\-upgrade.
+
 .SH "OPTIONS"
 .SS "BASIC OPTIONS"
 .TP

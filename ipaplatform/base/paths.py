@@ -173,6 +173,10 @@ class BasePathNamespace:
     SYSTEMD_SYSTEM_HTTPD_IPA_CONF = "/etc/systemd/system/httpd.service.d/ipa.conf"
     SYSTEMD_CERTMONGER_SERVICE = "/etc/systemd/system/multi-user.target.wants/certmonger.service"
     SYSTEMD_IPA_SERVICE = "/etc/systemd/system/multi-user.target.wants/ipa.service"
+    SYSTEMD_IPA_HEALTHCHECK_TIMER = \
+        "/etc/systemd/system/multi-user.target.wants/ipa-healthcheck.timer"
+    SYSTEMD_IPA_HEALTHCHECK_TIMER_MASK = \
+        "/etc/systemd/system/ipa-healthcheck.timer"
     SYSTEMD_SSSD_SERVICE = "/etc/systemd/system/multi-user.target.wants/sssd.service"
     SYSTEMD_PKI_TOMCAT_SERVICE = "/etc/systemd/system/pki-tomcatd.target.wants/pki-tomcatd@pki-tomcat.service"
     SYSTEMD_PKI_TOMCAT_IPA_CONF = \

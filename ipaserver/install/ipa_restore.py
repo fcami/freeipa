@@ -524,6 +524,15 @@ class Restore(admintool.AdminTool):
                 result = run([paths.IPACTL, 'restart'], raiseonerr=False)
                 if result.returncode != 0:
                     logger.error('Restarting IPA failed: %s', result.error_log)
+                # the timer is not managed by ipactl, start it if the
+                # restored configuration enables it
+                timer = services.knownservices['ipa-healthcheck']
+                if timer.is_enabled():
+                    try:
+                        timer.start(update_service_list=False)
+                    except ipautil.CalledProcessError as e:
+                        logger.warning('Unable to start %s: %s',
+                                       timer.systemd_name, e)
                 self.enable_server()
         finally:
             shutil.rmtree(self.top_dir)

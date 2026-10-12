@@ -57,6 +57,7 @@ from ipapython.dn import DN
 from ipapython.dnsutil import DNSName, resolve
 from ipaserver.install import certs, sysupgrade
 from ipaplatform import services
+from ipaplatform.constants import constants
 from ipaplatform.paths import paths
 from ipaplatform.tasks import tasks
 
@@ -1004,6 +1005,51 @@ def stopped_service(service, instance_name=""):
         finally:
             logger.debug('Starting %s%s.', service, log_instance_name)
             service_obj.start(instance_name)
+
+
+def enable_healthcheck_timer():
+    """Enable and start the daily freeipa-healthcheck timer"""
+    timer = services.knownservices['ipa-healthcheck']
+    if timer.is_masked():
+        logger.info(
+            '%s is masked, not enabling it', timer.systemd_name)
+        return
+    if not os.path.exists(timer.lib_path):
+        logger.warning(
+            'The %s package does not seem to be present on this system. '
+            'Please consider installing it, then run '
+            '"systemctl enable --now %s".',
+            constants.IPA_HEALTHCHECK_PACKAGE_NAME, timer.systemd_name
+        )
+        return
+    try:
+        timer.enable()
+        # the timer must not be recorded in the ipactl service list
+        timer.start(update_service_list=False)
+    except ipautil.CalledProcessError as e:
+        logger.warning(
+            'Unable to start %s (%s), run "systemctl enable --now %s" '
+            'to enable it manually', timer.systemd_name, e,
+            timer.systemd_name
+        )
+        return
+    if not timer.is_enabled():
+        logger.warning(
+            'Unable to enable %s, run "systemctl enable --now %s" '
+            'to enable it manually', timer.systemd_name, timer.systemd_name
+        )
+        return
+    sysupgrade.set_upgrade_state('healthcheck', 'timer_enabled', True)
+
+
+def disable_healthcheck_timer():
+    """Stop and disable the freeipa-healthcheck timer"""
+    timer = services.knownservices['ipa-healthcheck']
+    try:
+        timer.stop(update_service_list=False)
+    except ipautil.CalledProcessError:
+        pass
+    timer.disable()
 
 
 def check_entropy():

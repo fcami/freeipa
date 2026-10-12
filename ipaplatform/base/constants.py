@@ -117,6 +117,7 @@ class BaseConstantsNamespace:
     GSSPROXY_USER = User("root")
     IPA_ADTRUST_PACKAGE_NAME = "freeipa-server-trust-ad"
     IPA_DNS_PACKAGE_NAME = "freeipa-server-dns"
+    IPA_HEALTHCHECK_PACKAGE_NAME = "freeipa-healthcheck"
     KDCPROXY_USER = User("kdcproxy")
     NAMED_USER = User("named")
     NAMED_GROUP = Group("named")

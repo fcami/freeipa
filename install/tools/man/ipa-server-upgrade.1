@@ -20,6 +20,9 @@ ipa\-server\-upgrade will:
     * update LDAP schema
     * process all files with the extension .update in /usr/share/ipa/updates (including update plugins).
     * upgrade local configurations of IPA services
+    * enable ipa\-healthcheck.timer once, on servers where IPA never enabled it
+
+A timer that was masked by the administrator (systemctl mask ipa\-healthcheck.timer) is left untouched.
 
 .SH "OPTIONS"
 .TP

@@ -23,6 +23,8 @@ If the installation fails you may need to run ipa\-server\-install \-\-uninstall
 The installation will fail if the host you are installing the replica on exists as a host in IPA or an existing replication agreement exists (for example, from a previously failed installation).
 
 A replica should only be installed on the same or higher version of IPA on the remote system.
+
+If the freeipa\-healthcheck package is installed, ipa\-healthcheck.timer is enabled and started so that ipa\-healthcheck runs daily and writes its report to /var/log/ipa/healthcheck. To keep the timer disabled permanently, run "systemctl disable \-\-now ipa\-healthcheck.timer" then "systemctl mask ipa\-healthcheck.timer". Disabling first matters: masking alone leaves the timer's enablement link in place, and a later unmask would enable it again. A masked timer is left untouched by the installer and by ipa\-server\-upgrade.
 .SH "OPTIONS"
 .SS "OPTIONS"
 .TP
