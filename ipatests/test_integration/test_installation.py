@@ -1351,6 +1351,13 @@ class TestInstallMasterKRA(IntegrationTest):
         )
         assert 'enabled' in result.stdout_text
 
+    def test_healthcheck_timer_enabled_master(self):
+        """Test ipa-healthcheck.timer is enabled during server install"""
+        assert tasks.get_healthcheck_timer_state(self.master) == 'enabled'
+        self.master.run_command(
+            ['systemctl', 'is-active', 'ipa-healthcheck.timer']
+        )
+
     def test_install_dns(self):
         tasks.install_dns(self.master)
 
@@ -1385,6 +1392,12 @@ class TestInstallMasterKRA(IntegrationTest):
             )
             assert starting_serial != int(cert.serial_number)
 
+    def test_mask_healthcheck_timer_replica(self):
+        """Mask ipa-healthcheck.timer before the replica is installed"""
+        self.replicas[0].run_command(
+            ['systemctl', 'mask', 'ipa-healthcheck.timer']
+        )
+
     def test_install_replica_after_kracert_renewal(self):
         """
         Test replica installation with CA after the KRA certs renewal
@@ -1392,6 +1405,16 @@ class TestInstallMasterKRA(IntegrationTest):
         tasks.install_replica(self.master, self.replicas[0],
                               setup_ca=True)
         tasks.install_kra(self.replicas[0])
+
+    def test_healthcheck_timer_masked_replica(self):
+        """Test replica install leaves a masked ipa-healthcheck.timer masked"""
+        try:
+            state = tasks.get_healthcheck_timer_state(self.replicas[0])
+            assert state == 'masked'
+        finally:
+            self.replicas[0].run_command(
+                ['systemctl', 'unmask', 'ipa-healthcheck.timer']
+            )
 
 
 class TestInstallMasterDNS(IntegrationTest):

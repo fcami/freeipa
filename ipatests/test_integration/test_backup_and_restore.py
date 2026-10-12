@@ -131,6 +131,14 @@ def check_pkcs11_modules(host):
     return result
 
 
+def check_healthcheck_timer(host):
+    """the ipa-healthcheck.timer state must survive backup and restore"""
+    state = tasks.get_healthcheck_timer_state(host)
+    if state == 'enabled':
+        host.run_command(['systemctl', 'is-active', 'ipa-healthcheck.timer'])
+    return state
+
+
 CHECKS = [
     (check_admin_in_ldap, assert_entries_equal),
     (check_admin_in_cli, assert_results_equal),
@@ -139,7 +147,8 @@ CHECKS = [
     (check_dns, assert_results_equal),
     (check_kinit, assert_results_equal),
     (check_custodia_files, assert_deepequal),
-    (check_pkcs11_modules, assert_deepequal)
+    (check_pkcs11_modules, assert_deepequal),
+    (check_healthcheck_timer, assert_deepequal),
 ]
 
 

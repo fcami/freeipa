@@ -82,7 +82,7 @@ def named_test_template(host):
     return template_str(OLD_NAMED_TEMPLATE, sub_dict)
 
 
-def clear_sysupgrade(host, *sections):
+def read_sysupgrade(host):
     # get state file
     statefile = os.path.join(paths.STATEFILE_DIR, STATEFILE_FILE)
     state = host.get_file_contents(statefile, encoding="utf-8")
@@ -90,6 +90,12 @@ def clear_sysupgrade(host, *sections):
     parser = configparser.ConfigParser()
     parser.optionxform = str
     parser.read_string(state)
+    return parser
+
+
+def clear_sysupgrade(host, *sections):
+    statefile = os.path.join(paths.STATEFILE_DIR, STATEFILE_FILE)
+    parser = read_sysupgrade(host)
     # remove sections
     for section in sections:
         parser.remove_section(section)
@@ -540,3 +546,48 @@ class TestUpgrade(IntegrationTest):
         result = tasks.ldapsearch_dm(self.master, str(dn),
                                      ["ipaKrbAuthzData"])
         assert 'ipaKrbAuthzData: MS-PAC' in result.stdout_text
+
+    def test_healthcheck_timer_enabled_at_install(self):
+        """Test ipa-healthcheck.timer is enabled and flagged at install"""
+        assert tasks.get_healthcheck_timer_state(self.master) == 'enabled'
+        self.master.run_command(
+            ['systemctl', 'is-active', 'ipa-healthcheck.timer']
+        )
+        state = read_sysupgrade(self.master)
+        assert state.getboolean('healthcheck', 'timer_enabled')
+
+    def test_healthcheck_timer_masked_upgrade(self):
+        """Test ipa-server-upgrade does not enable a masked timer"""
+        timer = 'ipa-healthcheck.timer'
+        self.master.run_command(['systemctl', 'disable', '--now', timer])
+        self.master.run_command(['systemctl', 'mask', timer])
+        clear_sysupgrade(self.master, 'healthcheck')
+        try:
+            self.master.run_command(['ipa-server-upgrade'])
+            assert tasks.get_healthcheck_timer_state(self.master) == 'masked'
+            result = self.master.run_command(
+                ['systemctl', 'is-active', timer], raiseonerr=False
+            )
+            assert result.stdout_text.strip() == 'inactive'
+            state = read_sysupgrade(self.master)
+            assert not state.has_option('healthcheck', 'timer_enabled')
+        finally:
+            self.master.run_command(['systemctl', 'unmask', timer])
+
+    def test_healthcheck_timer_enabled_upgrade(self):
+        """Test ipa-server-upgrade enables the timer once
+
+        The flag asserted here and at install is what keeps the upgrade
+        from re-enabling a timer an administrator disabled later.
+        """
+        timer = 'ipa-healthcheck.timer'
+        self.master.run_command(['systemctl', 'disable', '--now', timer])
+        clear_sysupgrade(self.master, 'healthcheck')
+        try:
+            self.master.run_command(['ipa-server-upgrade'])
+            assert tasks.get_healthcheck_timer_state(self.master) == 'enabled'
+            self.master.run_command(['systemctl', 'is-active', timer])
+            state = read_sysupgrade(self.master)
+            assert state.getboolean('healthcheck', 'timer_enabled')
+        finally:
+            self.master.run_command(['systemctl', 'enable', '--now', timer])

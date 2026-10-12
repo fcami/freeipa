@@ -3586,3 +3586,12 @@ def host_add(host, hostname, *extra_args, password=None, raiseonerr=True):
         command.append(f'--password={password}')
     command.extend(extra_args)
     return host.run_command(command, raiseonerr=raiseonerr)
+
+
+def get_healthcheck_timer_state(host):
+    """Return the 'systemctl is-enabled' state of ipa-healthcheck.timer"""
+    result = host.run_command(
+        ['systemctl', 'is-enabled', 'ipa-healthcheck.timer'],
+        raiseonerr=False
+    )
+    return result.stdout_text.strip()
